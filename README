@@ -13,9 +13,12 @@ It also provides the functionality to combine plain text and html mail parts in 
 
 * Add the plugin to config/ProjectConfiguration.class.php
 
+        <?php
+
         public function setup() {
           $this->enablePlugins(/* already enabled plugins */, 'ggEmailPlugin');
         }
+        ?>
 
 ## Configuration ##
 
@@ -30,20 +33,25 @@ want to change.
 
 ## Usage ##
 
-To send an email, get the mailer (this works in actions and in tasks the same way)
+To send an email, get the mailer first(!) and then create the email message
 
-    $mailer = $this->getMailer();
+    <?php
 
-Then create the email message
-
+    $mailer = $this->getMailer();  // this works in actions and in tasks the same way
     $message = new ggEmailMessage('The subject');
+    ?>
 
 This message is a normal Swift_Message with one additional method setBodyFromTemplate().
 
+    <?php
+
     public function setBodyFromTemplate(sfController $controller, $module, $name,
-        array $params, $layout = null, $contentType = null, $charset = null)
+        array $params, $layout = null, $contentType = null, $charset = null) {}
+    ?>
 
 If you compose a message in an action like this
+
+    <?php
 
     $mailer = $this->getMailer();
     $message = new ggEmailMessage('Serious break in attempt');
@@ -53,6 +61,7 @@ If you compose a message in an action like this
         array('user' => 'georg', 'attempt' => 'SQL injection'),  // variables for the template
         'emergenceny_layout'  // name of the layout
     );
+    ?>
 
 the plugin works like this:
 
@@ -65,6 +74,8 @@ the plugin works like this:
 6. If not, it uses `app_ggEmail_layoutDir/emergceny_layout.php` to decorate the template (the text part is not decorated).
 
 In a task, you would use it like this:
+
+    <?php
 
     class sendAlertsTask extends sfDoctrineBaseTask {
 
@@ -84,6 +95,7 @@ In a task, you would use it like this:
             array('user' => 'georg', 'attempt' => 'SQL injection'), 'emergceny_layout');
       }
     }
+    ?>
 
 In this case the plugin would first try to find the template and layout in the directories of the application `app_where_to_look_for_templates`, and they are not found, in the directories defined by it's configuration.
 
