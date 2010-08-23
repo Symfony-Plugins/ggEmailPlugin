@@ -1,0 +1,90 @@
+# ggEmailPlugin #
+
+This plugin helps you to use the MVC pattern for emails also. This means that you can send the same email from any application or task, with or without decoration by a layout.
+It also provides the functionality to combine plain text and html mail parts in one mail (nearly) automatically.
+
+## Installation ##
+
+* Install the plugin
+
+        symfony plugin:install ggEmailPlugin -s=beta
+
+  Since the plugin is still in alpha mode, the install requires a `-s=beta` parameter.
+
+* Add the plugin to config/ProjectConfiguration.class.php
+
+        public function setup() {
+          $this->enablePlugins(/* already enabled plugins */, 'ggEmailPlugin');
+        }
+
+## Configuration ##
+
+You will find an app.yml.dist file in the plugin's config directory with the default settings.
+Just copy it in your main config directory and remove the comments from the settings you
+want to change.
+
+* `app_ggEmail_layoutDir` is the directory where the plugin will look for the layouts (default: `lib/email/templates`).
+* `app_ggEmail_templateDir` is the directory where it will look for the templates (default: `lib/email/modules`). The
+  tempates in this directory need to be organized the same way like in the apps module folder, for example in `app_ggEmail_templateDir/mymodule/templates/`
+  all templates for this module.
+
+## Usage ##
+
+To send an email, get the mailer (this works in actions and in tasks the same way)
+
+    $mailer = $this->getMailer();
+
+Then create the email message
+
+    $message = new ggEmailMessage('The subject');
+
+This message is a normal Swift_Message with one additional method setBodyFromTemplate().
+
+    public function setBodyFromTemplate(sfController $controller, $module, $name,
+        array $params, $layout = null, $contentType = null, $charset = null)
+
+If you compose a message in an action like this
+
+    $mailer = $this->getMailer();
+    $message = new ggEmailMessage('Serious break in attempt');
+    $message->setBodyFromTemplate($this->getController(),  // controller
+        'emergency', // name of the module
+        'serious_break_in',  // name of the template
+        array('user' => 'georg', 'attempt' => 'SQL injection'),  // variables for the template
+        'emergenceny_layout'  // name of the layout
+    );
+
+the plugin works like this:
+
+1. try to find the template with the name `serious_break_in.php` in the current application in the module `emergency` and use it as the template.
+2. if it is not found, the plugin tries to find `app_ggEmail_templateDir/emergency/templates/serious_break_in.php` and use it as the template.
+3. if this is not found, ggEmailPlugin looks for two further templates, `app_ggEmail_templateDir/emergency/templates/serious_break_in_html.php` and `app_ggEmail_templateDir/emergency/templates/serious_break_in_text.php` and uses them.
+   If it finds both, the html message and the text template are added as alternative parts.
+4. It puts the params in the template.
+5. Now it looks in the layout dir of the current application, if it finds `emergenceny_layout.php` there.
+6. If not, it uses `app_ggEmail_layoutDir/emergceny_layout.php` to decorate the template (the text part is not decorated).
+
+In a task, you would use it like this:
+
+    class sendAlertsTask extends sfDoctrineBaseTask {
+
+      protected function configure() {
+        $this->addOptions(array(
+            new sfCommandOption('application', null, sfCommandOption::PARAMETER_REQUIRED,
+            'The application name',
+            'app_where_to_look_for_templates')
+        ));
+      }
+
+      protected function execute($arguments = array(), $options = array()) {
+        $mailer = $this->getMailer();
+        $controller = sfContext::createInstance($this->configuration)->getController();
+        $message = new ggEmailMessage('Serious break in attempt');
+        $message->setBodyFromTemplate(controller, 'emergency', 'serious_break_in',
+            array('user' => 'georg', 'attempt' => 'SQL injection'), 'emergceny_layout');
+      }
+    }
+
+In this case the plugin would first try to find the template and layout in the directories of the application `app_where_to_look_for_templates`, and they are not found, in the directories defined by it's configuration.
+
+In this way you can always override the standard templates from the plugin's configuration with the templates in the application/module template directory.

@@ -1,0 +1,4 @@
+#all:
+#  ggEmail:
+#    layoutDir: "<?php echo sfConfig::get('sf_lib_dir') ?>/email/templates"
+#    templateDir: "<?php echo sfConfig::get('sf_lib_dir') ?>/email/modules"
