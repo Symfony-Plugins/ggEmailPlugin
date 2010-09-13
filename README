@@ -3,13 +3,15 @@
 This plugin helps you to use the MVC pattern for emails also. This means that you can send the same email from any application or task, with or without decoration by a layout.
 It also provides the functionality to combine plain text and html mail parts in one mail (nearly) automatically.
 
+It is now in beta state, but some people use it already in production without issues. Please discuss all issues on [http://forum.symfony-project.org/viewtopic.php?f=12&t=29462](http://forum.symfony-project.org/viewtopic.php?f=12&t=29462).
+
 ## Installation ##
 
 * Install the plugin
 
         symfony plugin:install ggEmailPlugin -s=beta
 
-  Since the plugin is still in alpha mode, the install requires a `-s=beta` parameter.
+  Since the plugin is still in beta mode, the install requires a `-s=beta` parameter.
 
 * Add the plugin to config/ProjectConfiguration.class.php
 
@@ -33,25 +35,17 @@ want to change.
 
 ## Usage ##
 
-To send an email, get the mailer first(!) and then create the email message
-
-    <?php
+To send an email, initialize the mailer __first__(call $this->getMailer(), which initializes the Swift auto loader) and then create the email message
 
     $mailer = $this->getMailer();  // this works in actions and in tasks the same way
     $message = new ggEmailMessage('The subject');
-    ?>
 
 This message is a normal Swift_Message with one additional method setBodyFromTemplate().
 
-    <?php
-
     public function setBodyFromTemplate(sfController $controller, $module, $name,
         array $params, $layout = null, $contentType = null, $charset = null) {}
-    ?>
 
 If you compose a message in an action like this
-
-    <?php
 
     $mailer = $this->getMailer();
     $message = new ggEmailMessage('Serious break in attempt');
@@ -61,7 +55,6 @@ If you compose a message in an action like this
         array('user' => 'georg', 'attempt' => 'SQL injection'),  // variables for the template
         'emergenceny_layout'  // name of the layout
     );
-    ?>
 
 the plugin works like this:
 
@@ -74,8 +67,6 @@ the plugin works like this:
 6. If not, it uses `app_ggEmail_layoutDir/emergceny_layout.php` to decorate the template (the text part is not decorated).
 
 In a task, you would use it like this:
-
-    <?php
 
     class sendAlertsTask extends sfDoctrineBaseTask {
 
@@ -91,11 +82,10 @@ In a task, you would use it like this:
         $mailer = $this->getMailer();
         $controller = sfContext::createInstance($this->configuration)->getController();
         $message = new ggEmailMessage('Serious break in attempt');
-        $message->setBodyFromTemplate(controller, 'emergency', 'serious_break_in',
+        $message->setBodyFromTemplate($controller, 'emergency', 'serious_break_in',
             array('user' => 'georg', 'attempt' => 'SQL injection'), 'emergceny_layout');
       }
     }
-    ?>
 
 In this case the plugin would first try to find the template and layout in the directories of the application `app_where_to_look_for_templates`, and they are not found, in the directories defined by it's configuration.
 
