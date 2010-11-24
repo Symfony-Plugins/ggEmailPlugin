@@ -3,7 +3,11 @@
 /**
  * Description of ggEmailMessage
  *
- * @author georg
+ * @package    ggEmailPlugin
+ * @author     Georg Gell
+ * @copyright  2010 Georg Gell
+ * @version    SVN: $Id$
+ * @license    MIT
  */
 class ggEmailMessage extends Swift_Message {
 
