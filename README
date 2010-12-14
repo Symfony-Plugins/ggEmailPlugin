@@ -13,14 +13,14 @@ This plugin is stable and unsed in production without issues. Please discuss all
 
 * Add the plugin to config/ProjectConfiguration.class.php
 
-  {{{
-  #!php
-  <?php
+{{{
+#!php
+<?php
   
-  public function setup() {
-    $this->enablePlugins(/* already enabled plugins */, 'ggEmailPlugin');
-  }
-  }}}
+public function setup() {
+  $this->enablePlugins(/* already enabled plugins */, 'ggEmailPlugin');
+}
+}}}
 
 ## Configuration ##
 
